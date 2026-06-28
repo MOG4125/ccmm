@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CCMM - Cookie Clicker Mod Builder</title>
+  <title>BCCMM (Brenda) - Cookie Clicker Mod Builder</title>
   <link rel="stylesheet" href="css/style.css" />
+<base target="_blank">
 </head>
 <body>
 
@@ -13,8 +14,8 @@
     <!-- Sidebar -->
     <aside id="sidebar">
       <div id="logo">
-        <span class="logo-cc">CC</span><span class="logo-mm">MM</span>
-        <span class="logo-sub">Mod Builder</span>
+        <span class="logo-cc">B</span><span class="logo-mm">CCMM</span>
+        <span class="logo-sub">(Brenda) Mod Builder</span>
       </div>
 
       <nav id="section-nav">
@@ -25,6 +26,8 @@
         <button class="nav-btn" data-section="golden">Golden Cookies</button>
         <button class="nav-btn" data-section="blabs">Blabs</button>
         <button class="nav-btn" data-section="misc">Misc / Hooks</button>
+        <button class="nav-btn" data-section="infotxt">Info.txt</button>
+        <button class="nav-btn" data-section="bookmarklets">Bookmarklets</button>
       </nav>
 
       <div id="sidebar-actions">
@@ -164,9 +167,46 @@
         </div>
       </section>
 
-    </main>
+      <!-- ===== INFO.TXT ===== -->
+      <section class="panel" id="panel-infotxt">
+        <h2 class="panel-title">Info.txt Preview</h2>
+        <p class="panel-desc">Preview the info.txt file content that will be generated when you export your mod. This file contains the mod metadata for Cookie Clicker's mod manager.</p>
 
-    <!-- Output panel removed: export now downloads files directly -->
+        <div class="field-group">
+          <label>Generated info.txt</label>
+          <textarea id="infotxt-preview" rows="10" class="code-area" readonly placeholder="Fill in Mod Info to see preview..."></textarea>
+        </div>
+        <button class="add-btn" id="btn-copy-infotxt">Copy to Clipboard</button>
+      </section>
+
+      <!-- ===== BOOKMARKLETS ===== -->
+      <section class="panel" id="panel-bookmarklets">
+        <h2 class="panel-title">Bookmarklet Code</h2>
+        <p class="panel-desc">Generate a JavaScript bookmarklet you can paste into your browser's bookmarks bar to run your mod on the <a href="https://orteil.dashnet.org/cookieclicker/" target="_blank">web version of Cookie Clicker</a>. Click the bookmark while on the game page to apply your mod instantly — no Steam mod manager needed!</p>
+
+        <div class="field-group">
+          <label>Generated Bookmarklet <span class="hint">(paste this as the URL of a new bookmark)</span></label>
+          <textarea id="bookmarklet-code" rows="12" class="code-area" readonly placeholder="Configure your mod settings to generate bookmarklet code..."></textarea>
+        </div>
+        <div class="field-row" style="margin-top: 12px;">
+          <button class="add-btn" id="btn-copy-bookmarklet">Copy to Clipboard</button>
+          <button class="add-btn" id="btn-update-bookmarklet" style="border-style: solid;">Refresh Code</button>
+        </div>
+        <div class="field-group" style="margin-top: 20px;">
+          <label>How to use</label>
+          <ol style="margin-left: 20px; color: var(--text-muted); font-size: 13px; line-height: 1.8;">
+            <li>Click "Refresh Code" to generate the bookmarklet from your current settings</li>
+            <li>Copy the generated code</li>
+            <li>In your browser, add a new bookmark (Ctrl+D or Cmd+D)</li>
+            <li>Paste the code into the URL/Location field</li>
+            <li>Name it something memorable (e.g. "Cookie Clicker Mod")</li>
+            <li>Go to <a href="https://orteil.dashnet.org/cookieclicker/" target="_blank">orteil.dashnet.org/cookieclicker</a></li>
+            <li>Click your bookmark to apply the mod!</li>
+          </ol>
+        </div>
+      </section>
+
+    </main>
 
   </div>
 
@@ -174,6 +214,7 @@
   <script src="js/upgrades.js"></script>
   <script src="js/blabs.js"></script>
   <script src="js/export.js"></script>
+  <script src="js/bookmarklets.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
