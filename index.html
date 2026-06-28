@@ -23,6 +23,7 @@
         <button class="nav-btn" data-section="buildings">Buildings</button>
         <button class="nav-btn" data-section="upgrades">Upgrades</button>
         <button class="nav-btn" data-section="golden">Golden Cookies</button>
+        <button class="nav-btn" data-section="blabs">Blabs</button>
         <button class="nav-btn" data-section="misc">Misc / Hooks</button>
       </nav>
 
@@ -123,6 +124,15 @@
         </div>
       </section>
 
+      <!-- ===== BLABS ===== -->
+      <section class="panel" id="panel-blabs">
+        <h2 class="panel-title">Blabs</h2>
+        <p class="panel-desc">Blabs are rare one-liner messages that flash on screen after a golden cookie is clicked. They do nothing — they're pure flavour. Add your own to the pool here.</p>
+
+        <div id="blabs-list"></div>
+        <button class="add-btn" id="btn-add-blab">+ Add Blab</button>
+      </section>
+
       <!-- ===== MISC ===== -->
       <section class="panel" id="panel-misc">
         <h2 class="panel-title">Misc / Hooks</h2>
@@ -156,22 +166,13 @@
 
     </main>
 
-    <!-- Output panel -->
-    <div id="output-panel" class="hidden">
-      <div id="output-header">
-        <span>output &mdash; main.js</span>
-        <div id="output-controls">
-          <button id="btn-copy">Copy</button>
-          <button id="btn-close-output">Close</button>
-        </div>
-      </div>
-      <pre id="output-code"></pre>
-    </div>
+    <!-- Output panel removed: export now downloads files directly -->
 
   </div>
 
   <script src="js/buildings.js"></script>
   <script src="js/upgrades.js"></script>
+  <script src="js/blabs.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>
 </body>
