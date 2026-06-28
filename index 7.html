@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CCMM - Cookie Clicker Mod Builder</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div id="logo">
+        <span class="logo-cc">CC</span><span class="logo-mm">MM</span>
+        <span class="logo-sub">Mod Builder</span>
+      </div>
+
+      <nav id="section-nav">
+        <button class="nav-btn active" data-section="info">Mod Info</button>
+        <button class="nav-btn" data-section="cursors">Cursors</button>
+        <button class="nav-btn" data-section="buildings">Buildings</button>
+        <button class="nav-btn" data-section="upgrades">Upgrades</button>
+        <button class="nav-btn" data-section="golden">Golden Cookies</button>
+        <button class="nav-btn" data-section="misc">Misc / Hooks</button>
+      </nav>
+
+      <div id="sidebar-actions">
+        <button id="btn-export" class="action-btn primary">Export Mod</button>
+        <button id="btn-reset" class="action-btn danger">Reset All</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main">
+
+      <!-- ===== MOD INFO ===== -->
+      <section class="panel active" id="panel-info">
+        <h2 class="panel-title">Mod Info</h2>
+        <p class="panel-desc">Basic metadata for your mod. This appears in Cookie Clicker's mod manager.</p>
+
+        <div class="field-group">
+          <label for="mod-name">Mod Name</label>
+          <input type="text" id="mod-name" placeholder="My Awesome Mod" />
+        </div>
+        <div class="field-group">
+          <label for="mod-id">Mod ID <span class="hint">(no spaces, lowercase)</span></label>
+          <input type="text" id="mod-id" placeholder="my-awesome-mod" />
+        </div>
+        <div class="field-group">
+          <label for="mod-version">Version</label>
+          <input type="text" id="mod-version" placeholder="1.0.0" />
+        </div>
+        <div class="field-group">
+          <label for="mod-author">Author</label>
+          <input type="text" id="mod-author" placeholder="Your Name" />
+        </div>
+        <div class="field-group">
+          <label for="mod-desc">Description</label>
+          <textarea id="mod-desc" rows="3" placeholder="A short description of what your mod does."></textarea>
+        </div>
+      </section>
+
+      <!-- ===== CURSORS ===== -->
+      <section class="panel" id="panel-cursors">
+        <h2 class="panel-title">Cursor Multipliers</h2>
+        <p class="panel-desc">Multiply base cursor CPS or the bonus cursors receive from each building.</p>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="cursor-cps">Base Cursor CPS Multiplier</label>
+            <input type="number" id="cursor-cps" value="1" min="0" step="0.1" />
+          </div>
+          <div class="field-group">
+            <label for="cursor-click">Click Power Multiplier</label>
+            <input type="number" id="cursor-click" value="1" min="0" step="0.1" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== BUILDINGS ===== -->
+      <section class="panel" id="panel-buildings">
+        <h2 class="panel-title">Building Multipliers</h2>
+        <p class="panel-desc">Set a CPS multiplier per building type. 1 = unchanged, 2 = double, 0.5 = half.</p>
+
+        <div id="buildings-list" class="building-grid"></div>
+      </section>
+
+      <!-- ===== UPGRADES ===== -->
+      <section class="panel" id="panel-upgrades">
+        <h2 class="panel-title">Custom Upgrades</h2>
+        <p class="panel-desc">Define new upgrades to add to the shop. They can boost buildings, clicks, or CPS globally.</p>
+
+        <div id="upgrades-list"></div>
+        <button class="add-btn" id="btn-add-upgrade">+ Add Upgrade</button>
+      </section>
+
+      <!-- ===== GOLDEN COOKIES ===== -->
+      <section class="panel" id="panel-golden">
+        <h2 class="panel-title">Golden Cookies</h2>
+        <p class="panel-desc">Tune how often golden cookies appear and how long they last.</p>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="gc-freq">Spawn Frequency Multiplier <span class="hint">(lower = more frequent)</span></label>
+            <input type="number" id="gc-freq" value="1" min="0.1" step="0.1" />
+          </div>
+          <div class="field-group">
+            <label for="gc-duration">Duration Multiplier</label>
+            <input type="number" id="gc-duration" value="1" min="0.1" step="0.1" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label for="gc-reward">Cookie Reward Multiplier</label>
+            <input type="number" id="gc-reward" value="1" min="0" step="0.1" />
+          </div>
+          <div class="field-group">
+            <label for="gc-frenzy">Frenzy Duration Multiplier</label>
+            <input type="number" id="gc-frenzy" value="1" min="0" step="0.1" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MISC ===== -->
+      <section class="panel" id="panel-misc">
+        <h2 class="panel-title">Misc / Hooks</h2>
+        <p class="panel-desc">Global tweaks and game hooks to apply at mod load time.</p>
+
+        <div class="field-group">
+          <label for="global-cps">Global CPS Multiplier</label>
+          <input type="number" id="global-cps" value="1" min="0" step="0.1" />
+        </div>
+        <div class="field-group">
+          <label for="starting-cookies">Starting Cookies <span class="hint">(added on new game)</span></label>
+          <input type="number" id="starting-cookies" value="0" min="0" step="100" />
+        </div>
+        <div class="field-group toggle-group">
+          <label>
+            <input type="checkbox" id="toggle-wrinklers" />
+            Disable Wrinklers
+          </label>
+        </div>
+        <div class="field-group toggle-group">
+          <label>
+            <input type="checkbox" id="toggle-seasons" />
+            Lock Season to None (no seasonal events)
+          </label>
+        </div>
+        <div class="field-group">
+          <label for="custom-js">Custom JavaScript <span class="hint">(runs after mod loads; advanced)</span></label>
+          <textarea id="custom-js" rows="6" class="code-area" placeholder="// e.g. Game.cookies = 1e100;"></textarea>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Output panel -->
+    <div id="output-panel" class="hidden">
+      <div id="output-header">
+        <span>output &mdash; main.js</span>
+        <div id="output-controls">
+          <button id="btn-copy">Copy</button>
+          <button id="btn-close-output">Close</button>
+        </div>
+      </div>
+      <pre id="output-code"></pre>
+    </div>
+
+  </div>
+
+  <script src="js/buildings.js"></script>
+  <script src="js/upgrades.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
