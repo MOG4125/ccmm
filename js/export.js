@@ -64,10 +64,7 @@ function generateMod() {
   if (cursorCps !== 1 || cursorClick !== 1) {
     lines.push(`    // Cursor multipliers`);
     if (cursorCps !== 1) {
-      lines.push(`    Game.registerHook("cps", function() {`);
-      lines.push(`      var cursor = Game.Objects["Cursor"];`);
-      lines.push(`      if (cursor) cursor.storedCps *= ${cursorCps};`);
-      lines.push(`    });`);
+      lines.push(`    Game.Objects["Cursor"].storedCps *= ${cursorCps};`);
     }
     if (cursorClick !== 1) {
       lines.push(`    var _origMouseCps = Game.computedMouseCps;`);
@@ -82,7 +79,6 @@ function generateMod() {
   const nonDefaultBuildings = Object.entries(buildingMults).filter(([, v]) => v !== 1);
   if (nonDefaultBuildings.length > 0) {
     lines.push(`    // Building CPS multipliers`);
-    lines.push(`    Game.registerHook("cps", function() {`);
 
     const buildingNameMap = {
       cursor: "Cursor", grandma: "Grandma", farm: "Farm", mine: "Mine",
@@ -97,10 +93,9 @@ function generateMod() {
 
     nonDefaultBuildings.forEach(([id, mult]) => {
       const name = buildingNameMap[id] || id;
-      lines.push(`      if (Game.Objects["${name}"]) Game.Objects["${name}"].storedCps *= ${mult};`);
+      lines.push(`    if (Game.Objects["${name}"]) Game.Objects["${name}"].storedCps *= ${mult};`);
     });
 
-    lines.push(`    });`);
     lines.push(``);
   }
 
@@ -110,37 +105,39 @@ function generateMod() {
     lines.push(`    // Golden cookie tweaks`);
 
     if (gcFreq !== 1) {
-      lines.push(`    var _origGCmaxTime = Game.shimmer.prototype.maxTime;`);
       lines.push(`    // Frequency multiplier: lower value = appears more often`);
+      lines.push(`    Game.goldenCookieMod = ${gcFreq};`);
       lines.push(`    Game.registerHook("logic", function() {`);
       lines.push(`      for (var i in Game.shimmers) {`);
       lines.push(`        var s = Game.shimmers[i];`);
-      lines.push(`        if (s.type === "golden") {`);
-      lines.push(`          s.maxTime = s.maxTime * ${gcFreq};`);
+      lines.push(`        if (s.type === "golden" && !s.ccmmFixed) {`);
+      lines.push(`          s.maxTime = s.maxTime * Game.goldenCookieMod;`);
+      lines.push(`          s.ccmmFixed = true;`);
       lines.push(`        }`);
       lines.push(`      }`);
       lines.push(`    });`);
     }
 
     if (gcDuration !== 1) {
-      lines.push(`    var _origDie = Game.shimmer.prototype.pop;`);
-      lines.push(`    Game.shimmer.prototype.lifeTime = (Game.shimmer.prototype.lifeTime || 13) * ${gcDuration};`);
+      lines.push(`    // Duration multiplier`);
+      lines.push(`    Game.shimmer.prototype.life = (Game.shimmer.prototype.life || 13) * ${gcDuration};`);
     }
 
     if (gcReward !== 1) {
-      lines.push(`    var _origReward = Game.goldenCookie.prototype ? Game.goldenCookie.prototype.getEffect : null;`);
+      lines.push(`    // Reward multiplier`);
       lines.push(`    var _origEarn = Game.Earn;`);
       lines.push(`    Game.Earn = function(n) {`);
-      lines.push(`      return _origEarn.call(this, n);`);
+      lines.push(`      return _origEarn.call(this, n * ${gcReward});`);
       lines.push(`    };`);
-      lines.push(`    Game.goldenCookieRewardMult = ${gcReward};`);
     }
 
     if (gcFrenzy !== 1) {
       lines.push(`    // Frenzy duration multiplier`);
-      lines.push(`    if (Game.buffs["Frenzy"]) {`);
-      lines.push(`      Game.buffs["Frenzy"].time *= ${gcFrenzy};`);
-      lines.push(`    }`);
+      lines.push(`    var _origBuffTime = Game.gainBuff;`);
+      lines.push(`    Game.gainBuff = function(type,time,arg) {`);
+      lines.push(`      if (type === "frenzy") time *= ${gcFrenzy};`);
+      lines.push(`      return _origBuffTime.call(this, type, time, arg);`);
+      lines.push(`    };`);
     }
 
     lines.push(``);
@@ -149,9 +146,7 @@ function generateMod() {
   // ---- global CPS ----
   if (globalCps !== 1) {
     lines.push(`    // Global CPS multiplier`);
-    lines.push(`    Game.registerHook("cps", function() {`);
-    lines.push(`      Game.cookiesPs *= ${globalCps};`);
-    lines.push(`    });`);
+    lines.push(`    Game.cookiesPs *= ${globalCps};`);
     lines.push(``);
   }
 
@@ -203,31 +198,29 @@ function generateMod() {
     upgrades.forEach((u, idx) => {
       const safDesc    = (u.desc || "").replace(/"/g, '\\"');
       const safUpgName = u.name.replace(/"/g, '\\"');
+      const upgId = safeName(u.name) + "_" + idx;
 
-      lines.push(`    Game.customUpgrades["${safUpgName}"] = new Game.Upgrade(`);
+      lines.push(`    // Upgrade: ${safUpgName}`);
+      lines.push(`    var ${upgId} = new Game.Upgrade(`);
       lines.push(`      "${safUpgName}",`);
       lines.push(`      "${safDesc}",`);
-      lines.push(`      ${u.cost},`);
-      lines.push(`      function() {`);
+      lines.push(`      ${u.cost}`);
+      lines.push(`    );`);
+      lines.push(`    ${upgId}.buyFunction = function() {`);
 
       if (u.target === "global_cps") {
-        lines.push(`        Game.registerHook("cps", function() {`);
-        lines.push(`          Game.cookiesPs *= ${u.multiplier};`);
-        lines.push(`        });`);
+        lines.push(`      Game.cookiesPs *= ${u.multiplier};`);
       } else if (u.target === "click") {
-        lines.push(`        var _origMC = Game.computedMouseCps;`);
-        lines.push(`        Game.computedMouseCps = function() {`);
-        lines.push(`          return _origMC.call(this) * ${u.multiplier};`);
-        lines.push(`        };`);
+        lines.push(`      var _origMC = Game.computedMouseCps;`);
+        lines.push(`      Game.computedMouseCps = function() {`);
+        lines.push(`        return _origMC.call(this) * ${u.multiplier};`);
+        lines.push(`      };`);
       } else {
         const buildingName = targetNameMap[u.target] || u.target;
-        lines.push(`        Game.registerHook("cps", function() {`);
-        lines.push(`          if (Game.Objects["${buildingName}"]) Game.Objects["${buildingName}"].storedCps *= ${u.multiplier};`);
-        lines.push(`        });`);
+        lines.push(`      if (Game.Objects["${buildingName}"]) Game.Objects["${buildingName}"].storedCps *= ${u.multiplier};`);
       }
 
-      lines.push(`      }`);
-      lines.push(`    );`);
+      lines.push(`    };`);
       lines.push(``);
     });
   }
