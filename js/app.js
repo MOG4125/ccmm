@@ -28,6 +28,14 @@ document.addEventListener("DOMContentLoaded", function() {
       btn.classList.add("active");
       const target = document.getElementById("panel-" + btn.dataset.section);
       if (target) target.classList.add("active");
+
+      // Update preview panels when opened
+      if (btn.dataset.section === "infotxt") {
+        updateInfoTxtPreview();
+      }
+      if (btn.dataset.section === "bookmarklets") {
+        updateBookmarkletPreview();
+      }
     });
   });
 
@@ -74,6 +82,9 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("toggle-wrinklers").checked = false;
     document.getElementById("toggle-seasons").checked   = false;
     document.getElementById("custom-js").value          = "";
+
+    updateInfoTxtPreview();
+    updateBookmarkletPreview();
   });
 
   // ---- auto-generate mod ID from name ----
@@ -91,6 +102,31 @@ document.addEventListener("DOMContentLoaded", function() {
     this.dataset.userEdited = "true";
   });
 
+  // ---- info.txt preview ----
+  document.getElementById("btn-copy-infotxt").addEventListener("click", function() {
+    const preview = document.getElementById("infotxt-preview");
+    if (preview && preview.value) {
+      navigator.clipboard.writeText(preview.value).then(() => {
+        showToast("Copied info.txt to clipboard!");
+      });
+    }
+  });
+
+  // ---- bookmarklet ----
+  document.getElementById("btn-copy-bookmarklet").addEventListener("click", function() {
+    const code = document.getElementById("bookmarklet-code");
+    if (code && code.value) {
+      navigator.clipboard.writeText(code.value).then(() => {
+        showToast("Copied bookmarklet to clipboard!");
+      });
+    }
+  });
+
+  document.getElementById("btn-update-bookmarklet").addEventListener("click", function() {
+    updateBookmarkletPreview();
+    showToast("Bookmarklet code refreshed!");
+  });
+
   // ---- helper ----
   function switchPanel(section) {
     navBtns.forEach(b => b.classList.remove("active"));
@@ -99,6 +135,13 @@ document.addEventListener("DOMContentLoaded", function() {
     if (btn) btn.classList.add("active");
     const panel = document.getElementById("panel-" + section);
     if (panel) panel.classList.add("active");
+  }
+
+  function updateInfoTxtPreview() {
+    const preview = document.getElementById("infotxt-preview");
+    if (preview) {
+      preview.value = generateInfoTxt();
+    }
   }
 
 });
