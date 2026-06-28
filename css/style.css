@@ -391,69 +391,70 @@ textarea.code-area {
 }
 
 /* ------------------------------------------------
-   Output panel
+   Blabs
 ------------------------------------------------ */
 
-#output-panel {
-  position: fixed;
-  bottom: 0;
-  left: var(--sidebar-w);
-  right: 0;
-  height: 52%;
-  background: var(--bg-output);
-  border-top: 1px solid #444;
+#blabs-list {
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-#output-panel.hidden {
-  display: none;
-}
-
-#output-header {
+.blab-card {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
-  background: #2d2d2d;
-  border-bottom: 1px solid #444;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: #aaa;
-  flex-shrink: 0;
-}
-
-#output-controls {
-  display: flex;
   gap: 8px;
 }
 
-#output-controls button {
-  background: #444;
-  border: none;
-  border-radius: var(--radius);
-  color: #ccc;
-  font-size: 12px;
-  padding: 4px 12px;
-  cursor: pointer;
-  font-family: var(--font-ui);
-}
-
-#output-controls button:hover {
-  background: #555;
-  color: #fff;
-}
-
-#output-code {
+.blab-input {
   flex: 1;
-  overflow: auto;
-  padding: 16px;
   font-family: var(--font-mono);
   font-size: 12.5px;
-  line-height: 1.6;
+}
+
+.btn-remove-blab {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--danger);
+  font-size: 12px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.btn-remove-blab:hover {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+/* ------------------------------------------------
+   Export toast
+------------------------------------------------ */
+
+#export-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e1e1e;
   color: #d4d4d4;
-  white-space: pre;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  border: 1px solid #444;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 200;
+}
+
+#export-toast.show {
+  opacity: 1;
 }
 
 /* ------------------------------------------------
@@ -509,10 +510,5 @@ textarea.code-area {
 
   .upgrade-grid {
     grid-template-columns: 1fr;
-  }
-
-  #output-panel {
-    left: 0;
-    height: 60%;
   }
 }
