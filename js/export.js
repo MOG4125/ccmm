@@ -13,11 +13,6 @@ function num(id, def = 1) {
   return isNaN(v) ? def : v;
 }
 
-function indent(code, spaces = 2) {
-  const pad = " ".repeat(spaces);
-  return code.split("\n").map(l => (l.trim() === "" ? "" : pad + l)).join("\n");
-}
-
 function safeName(str) {
   return (str || "unnamed")
     .replace(/[^a-zA-Z0-9_]/g, "_")
@@ -41,15 +36,14 @@ function generateMod() {
   const gcReward   = num("gc-reward", 1);
   const gcFrenzy   = num("gc-frenzy", 1);
 
-  const globalCps       = num("global-cps", 1);
-  const startingCookies = num("starting-cookies", 0);
+  const globalCps        = num("global-cps", 1);
+  const startingCookies  = num("starting-cookies", 0);
   const disableWrinklers = gv("toggle-wrinklers");
-  const lockSeason      = gv("toggle-seasons");
-  const customJs        = gv("custom-js") || "";
+  const lockSeason       = gv("toggle-seasons");
+  const customJs         = gv("custom-js") || "";
 
   const upgrades = getUpgrades();
-
-  // ---- build sections ----
+  const blabs    = getBlabs();
 
   const lines = [];
 
@@ -135,10 +129,8 @@ function generateMod() {
 
     if (gcReward !== 1) {
       lines.push(`    var _origReward = Game.goldenCookie.prototype ? Game.goldenCookie.prototype.getEffect : null;`);
-      lines.push(`    // Reward multiplier applied via cookie earnings hook`);
       lines.push(`    var _origEarn = Game.Earn;`);
       lines.push(`    Game.Earn = function(n) {`);
-      lines.push(`      // Only amplify lump gains tagged as golden-cookie earnings`);
       lines.push(`      return _origEarn.call(this, n);`);
       lines.push(`    };`);
       lines.push(`    Game.goldenCookieRewardMult = ${gcReward};`);
@@ -146,7 +138,6 @@ function generateMod() {
 
     if (gcFrenzy !== 1) {
       lines.push(`    // Frenzy duration multiplier`);
-      lines.push(`    var _origFrenzyDuration = Game.buffs["Frenzy"] ? Game.buffs["Frenzy"].time : null;`);
       lines.push(`    if (Game.buffs["Frenzy"]) {`);
       lines.push(`      Game.buffs["Frenzy"].time *= ${gcFrenzy};`);
       lines.push(`    }`);
@@ -178,8 +169,8 @@ function generateMod() {
     lines.push(`    // Disable wrinklers`);
     lines.push(`    Game.registerHook("logic", function() {`);
     lines.push(`      for (var i in Game.wrinklers) {`);
-      lines.push(`        Game.wrinklers[i].type = 1; // freeze all wrinkler spawning`);
-      lines.push(`        Game.wrinklers[i].phase = 0;`);
+    lines.push(`        Game.wrinklers[i].type = 1;`);
+    lines.push(`        Game.wrinklers[i].phase = 0;`);
     lines.push(`      }`);
     lines.push(`    });`);
     lines.push(``);
@@ -210,8 +201,7 @@ function generateMod() {
     };
 
     upgrades.forEach((u, idx) => {
-      const varName = safeName(u.name) || `upgrade${idx + 1}`;
-      const safDesc = (u.desc || "").replace(/"/g, '\\"');
+      const safDesc    = (u.desc || "").replace(/"/g, '\\"');
       const safUpgName = u.name.replace(/"/g, '\\"');
 
       lines.push(`    Game.customUpgrades["${safUpgName}"] = new Game.Upgrade(`);
@@ -221,19 +211,16 @@ function generateMod() {
       lines.push(`      function() {`);
 
       if (u.target === "global_cps") {
-        lines.push(`        // Global CPS x${u.multiplier}`);
         lines.push(`        Game.registerHook("cps", function() {`);
         lines.push(`          Game.cookiesPs *= ${u.multiplier};`);
         lines.push(`        });`);
       } else if (u.target === "click") {
-        lines.push(`        // Click power x${u.multiplier}`);
         lines.push(`        var _origMC = Game.computedMouseCps;`);
         lines.push(`        Game.computedMouseCps = function() {`);
         lines.push(`          return _origMC.call(this) * ${u.multiplier};`);
         lines.push(`        };`);
       } else {
         const buildingName = targetNameMap[u.target] || u.target;
-        lines.push(`        // ${buildingName} x${u.multiplier}`);
         lines.push(`        Game.registerHook("cps", function() {`);
         lines.push(`          if (Game.Objects["${buildingName}"]) Game.Objects["${buildingName}"].storedCps *= ${u.multiplier};`);
         lines.push(`        });`);
@@ -243,6 +230,23 @@ function generateMod() {
       lines.push(`    );`);
       lines.push(``);
     });
+  }
+
+  // ---- blabs ----
+  if (blabs.length > 0) {
+    lines.push(`    // Custom blabs (golden cookie flavour messages)`);
+    lines.push(`    var ccmmBlabs = [`);
+    blabs.forEach((b, i) => {
+      const escaped = b.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      lines.push(`      "${escaped}"${i < blabs.length - 1 ? "," : ""}`);
+    });
+    lines.push(`    ];`);
+    lines.push(`    ccmmBlabs.forEach(function(msg) {`);
+    lines.push(`      if (Game.goldenCookieBlabMessages && Game.goldenCookieBlabMessages.indexOf(msg) === -1) {`);
+    lines.push(`        Game.goldenCookieBlabMessages.push(msg);`);
+    lines.push(`      }`);
+    lines.push(`    });`);
+    lines.push(``);
   }
 
   // ---- custom JS ----
@@ -256,4 +260,41 @@ function generateMod() {
   lines.push(`});`);
 
   return lines.join("\n");
+}
+
+function generateInfoTxt() {
+  const modName    = document.getElementById("mod-name")?.value.trim()    || "My Mod";
+  const modId      = document.getElementById("mod-id")?.value.trim()      || "my-mod";
+  const modVersion = document.getElementById("mod-version")?.value.trim() || "1.0.0";
+  const modAuthor  = document.getElementById("mod-author")?.value.trim()  || "";
+  const modDesc    = document.getElementById("mod-desc")?.value.trim()    || "";
+
+  const lines = [
+    `name:${modName}`,
+    `id:${modId}`,
+    `version:${modVersion}`,
+  ];
+  if (modAuthor) lines.push(`author:${modAuthor}`);
+  if (modDesc)   lines.push(`description:${modDesc}`);
+
+  return lines.join("\n");
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/plain" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportAndDownload() {
+  downloadText("main.js",  generateMod());
+  setTimeout(() => {
+    downloadText("info.txt", generateInfoTxt());
+  }, 150);
 }
